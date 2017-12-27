@@ -1,0 +1,75 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 商品列表</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="favicon.ico"> <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <style type="text/css">
+    .fixed-table-container{
+        height: 100%;
+    }
+    .bootstrap-table{
+        height: 100%;
+    }
+</style>
+</head>
+
+    <!-- 全局js -->
+    <script src="js/jquery.min.js?v=2.1.4"></script>
+    <script src="js/bootstrap.min.js?v=3.3.6"></script>
+    <!-- 自定义js -->
+    <script src="js/content.js?v=1.0.0"></script>
+    <!-- Bootstrap table -->
+    <script src="js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight" style="height:100%;">
+        <div class="ibox float-e-margins" style="height:100%;">
+            <div class="ibox-content" style="height:100%;">
+                <div class="row row-lg" style="height:100%;">
+                    <div class="col-sm-6" style="width: 100%;height:100%;">
+                        <h4 class="example-title">商品列表</h4>
+                        <div class="example" style="height:97%;">
+
+                            <table data-toggle="table" data-url="api/query_pd_info.php" data-height="" data-mobile-responsive="true" style="height:100%;" id="exampleTablePagination">
+                                <thead>
+                                    <tr>
+                                        <th data-field="pool_code">商品编码</th>
+                                        <th data-field="name">商品名称</th>
+                                        <th data-field="brand_name">品牌名称</th>
+                                        <th data-field="category_name">品类名称</th>
+                                        <th data-field="unit">计量单位</th>
+                                        <th data-field="packing_unit">包装单位</th>
+                                        <th data-field="packing_specification">箱规</th>
+                                        <th data-field="valid_period">保质期</th>
+                                        <th data-field="unit_specification">规格</th>
+
+                                    </tr>
+                                </thead>
+                            </table>
+            
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     <script type="text/javascript">
+         $(function () {
+            $(window).resize(function () {
+                $("#exampleTablePagination").bootstrapTable('resetView');
+            });
+         })
+     </script>  
+</body>
+
+</html>

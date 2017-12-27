@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 商品查询</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link href="../css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../css/animate.css" rel="stylesheet">
+    <link href="../css/style.css?v=4.1.0" rel="stylesheet">
+</head>
+<body class="gray-bg">
+    <div class="col-sm-6" style="margin-top: 10px;">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>商品查询</h5>
+            </div>
+            <!-- 查询 -->   
+            <form class="form-horizontal"> 
+　　　　　　　　<div class="form-group">
+                    <label class="col-sm-2 control-label">商品条码：</label>
+                    <div class="col-sm-8">
+                        <input type="text" placeholder="请输入商品条码" class="form-control" id="searchCode" value="">
+                    </div>
+                    <input type="button" value="查询" class="btn btn-info" onclick="getSearchData()">
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 查询结果显示 -->
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins" style="overflow: hidden;">
+            <div class="ibox-title" style="margin-bottom: 10px;"><h5>查询结果</h5></div>
+            <form class="form-horizontal" id="searchFrom" style="overflow: hidden;">    
+                <div class="form-group col-sm-6">
+                    <label for="bar_code" class="col-sm-2 control-label">商品条码：</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="bar_code" value="" readonly="readonly">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="name" class="col-sm-2 control-label">商品名称：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="name" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="brand_name" class="col-sm-2 control-label">品牌名称：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="brand_name" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="category" class="col-sm-2 control-label">品类名称：</label>
+                    <div class="col-sm-8">
+                      <select id="category" class="form-control" style="padding-top: 4px">
+                        <option value="" title="">请选择</option>
+                      </select>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="unit" class="col-sm-2 control-label">计量单位：</label>
+                    <div class="col-sm-8">
+                      <select id="unit" class="form-control" style="padding-top: 4px">
+                        <option value="">请选择</option>
+                      </select>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="packing_unit" class="col-sm-2 control-label">包装单位：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="packing_unit" value="" readonly="readonly">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="packing_specification" class="col-sm-2 control-label">箱规：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="packing_specification" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="valid_period" class="col-sm-2 control-label">保质期：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="valid_period" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="unit_specification" class="col-sm-2 control-label">规格：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="unit_specification" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="suggested_retail_price" class="col-sm-2 control-label">建议零售价：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="suggested_retail_price" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="portrait" class="col-sm-2 control-label">主图地址：</label>
+                    <div class="col-sm-8">
+                      <input type="text" class="form-control" id="portrait" value="">
+                    </div>
+                </div>
+                <div class="form-group col-sm-12">
+                      <input type="button" value="保存到数据库" class="btn btn-info btn-lg" style="margin-left: 9%" onclick="insertData()">
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 全局js -->
+    <script src="../js/jquery.min.js?v=2.1.4"></script>
+    <script src="../js/bootstrap.min.js?v=3.3.6"></script>
+    <!-- 自定义js -->
+    <script src="../js/content.js?v=1.0.0"></script>
+    <script type="text/javascript" src="../js/plugins/layer/layer.min.js"></script>
+    <script type="text/javascript">
+        var a_token = window.sessionStorage.getItem('token') || {};
+        // 自执行函数
+        $(function () {
+            getCategory();
+            // units下拉框
+            var units = ['盒','个','瓶','箱','罐','袋','包','kg','g','斤','台','件','根','桶','碗','杯','条','支','张'];
+            $.each(units, function(i, item){        
+              $("#unit").append($("<option/>").text(item).attr("value",item));  
+            });
+        });
+        // enter键关闭最新打开的layer弹框
+        $(document).on('keyup',function(e){
+          if(e.keyCode === 13){
+              layer.close(layer.index);
+          }
+        });
+        // 查询商品数据
+        function getSearchData() {
+            var code = $('#searchCode').val();
+            if (code !== "") {
+               $.ajax({
+                    type: "POST",
+                    url: "../api/showapi_pd_info.php",
+                    data: {code:code},
+                    dataType: "jsonp",
+                    jsonp: 'jsonpcallback',
+                    beforeSend: function(request) {
+                      request.setRequestHeader("token", a_token);
+                    },
+                    success: function (res) {
+                        if (res.code == "success") { 
+                           setResult(res.data);
+                        }
+                    },
+                    error: function (res) {
+                        console.log(res.responseText)
+                        var data = JSON.parse(res.responseText);
+                        if (data.success == 0) {
+                            layer.alert(data.msg, function (index) {
+                                top.location.href = 'login.html';
+                            });
+                        } else {
+                            layer.alert('未查询到该商品！');
+                        }; 
+                    }
+                }); 
+           } else {
+            layer.alert('条码不能为空！')
+           };
+        };
+        // 赋值到查询结果表单
+        function setResult(item) {
+            $('#bar_code').val(item.code);
+            $('#name').val(item.goodsName);
+            $('#unit_specification').val(item.spec);
+            $('#suggested_retail_price').val(item.price);
+            $('#brand_name').val(item.trademark);
+            $('#portrait').val(item.img);
+            $('#packing_unit').val('箱');
+        };
+        // 获取category
+        function getCategory() {
+            $.ajax({
+             type: "GET",
+             url: "../api/query_category_info.php"
+            }).done(function (res) {
+                var cateData = JSON.parse(res);
+                $.each(cateData, function(i, item){        
+                  $("#category").append($("<option/>").text(item.category_code +'_'+ item.category_name).attr("value",item.category_code).attr('title',item.category_name));  
+                });  
+            }).fail(function () {
+                layer.alert('获取品类失败！');
+            })
+        };
+        // 存入数据库
+        function insertData() {
+            var paramArray = {
+                bar_code: $('#bar_code').val(),
+                name: $('#name').val(),
+                brand_name: $('#brand_name').val(),
+                category_code: $('#category').val(),
+                category_name: $('#category').children('option:selected').attr("title"),
+                unit: $('#unit').val(),
+                packing_unit: $('#packing_unit').val(),
+                unit_specification: $('#unit_specification').val(),
+                valid_period: $('#valid_period').val(),
+                portrait: $('#portrait').val(),
+                suggested_retail_price: $('#suggested_retail_price').val(),
+                packing_specification: $('#packing_specification').val()
+            };
+            if (paramArray.bar_code !== "") {
+                $.ajax({
+                    type: "GET",
+                    url: "../api/insert_pd_info.php",
+                    data: paramArray,
+                    dataType: "jsonp",
+                    jsonp: 'jsonpcallback',
+                    beforeSend: function(request) {
+                      request.setRequestHeader("token", a_token);
+                    },
+                    success: function (data) {
+                        if (data.msg) {
+                           layer.alert('保存成功！', function (index) {
+                            // 刷新页面
+                            location.reload();
+                           });
+                        } else {
+                            layer.alert('保存失败！')
+                        };
+                    },
+                    error: function (res) {
+                        var data = JSON.parse(res.responseText);
+                        if (data.success == 0) {
+                            layer.alert(data.msg, function (index) {
+                                top.location.href = "../login.html";
+                            });
+                        };
+                    }
+                })
+            } else {
+                layer.alert('请输入正确商品信息！');
+            };
+        };
+
+    </script>
+</body>
+
+</html>

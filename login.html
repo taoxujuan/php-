@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <style type="text/css">
+        body{
+            background: url(img/dd490d4226540cc8deaaccd1d6d84e37.jpg);
+            background-position: center;
+            background-repeat:no-repeat; 
+            background-size:100% 100%;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="container">
+        <div class="middle-box text-center loginscreen" style="margin-top: 15%;">
+            <h2>逗妮开心商品管理平台</h2>
+            <!-- 登录 -->   
+            <form class="m-t"> 
+　　　　　　　　<div class="form-group">
+                    <input type="text" name="username" id="username" class="form-control" placeholder="请输入用户名" required="">
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="请输入密码" required="">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="code" id="code" maxlength="4" placeholder="请输入验证码">
+                    <span id="imageMaskSpan" style="display: inline-block;margin-top: 10px">
+                        <img src="api/code.php" id="getcode" title="看不清，点击换一张" align="absmiddle">
+                    </span>
+                </div>
+                <button type="button" class="btn btn-info block full-width m-b" id="login">登 录</button>
+            </form>
+        </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery.min.js?v=2.1.4"></script>
+    <script src="js/bootstrap.min.js?v=3.3.6"></script>
+    <!-- 自定义js -->
+    <script src="js/content.js?v=1.0.0"></script>
+    <script type="text/javascript" src="js/plugins/layer/layer.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            window.sessionStorage.removeItem('token');
+            $('.gohome').css('display', 'none');
+        })
+        $("#getcode").click(function(){
+            $(this).attr("src",'api/code.php?' + Math.random());
+        });
+        $("#login").click(function(){
+            var code = $("#code").val();
+            var username = $("#username").val();
+            var password = $('#password').val();
+            if (username && password) {
+                $.post("api/check_code.php", {
+                    username: username,
+                    password: password,
+                    code: code
+                }, function (data) {
+                    var res = $.parseJSON(data);
+                    if (res.success) {
+                        window.sessionStorage.setItem('token', res.token);
+                        window.location.href="index.html";
+                    } else {
+                        layer.alert(res.msg);
+                    }
+                })
+            } else {
+                layer.alert('请填写用户名和密码！')
+            }
+        });
+    </script>
+</body>
+
+</html>

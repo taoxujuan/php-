@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品导出</title>
+    <meta name="keywords" content="商品">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="favicon.ico"> 
+    <link href="../css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="../css/animate.css" rel="stylesheet">
+    <link href="../css/style.css?v=4.1.0" rel="stylesheet">
+    <style type="text/css">
+        .col-sm-2{
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight" style="height:100%;">
+        <div class="ibox float-e-margins" style="height:100%;">
+          <div class="example-wrap">
+                <form class="navbar-form navbar-left" role="search">
+                  <div class="form-group">
+                    <label for="category">商品品类：</label>
+                    <select id="category" class="form-control" style="padding-top: 3px;">
+                        <option value="">全部</option>
+                    </select>
+                    <input type="text" name="" class="form-control" placeholder="请输入商品名称" id="searchText" style="margin-left: 5px;">
+                    <button type="button" class="btn btn-info" style="margin-top: 5px;" onclick="searchGood()">查询</button>
+                    <button type="button" class="btn btn-info" style="margin-top: 5px;" onclick="excelOut()">导出</button>
+                  </div>
+                </form>
+                <table id="exampleTablePagination">
+                </table>
+          </div>
+        </div>
+    </div> 
+    <!-- 全局js -->
+    <script src="../js/jquery.min.js?v=2.1.4"></script>
+    <script src="../js/bootstrap.min.js?v=3.3.6"></script>
+    <script src="../js/content.js?v=1.0.0"></script>
+    <script src="../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script type="text/javascript" src="../js/plugins/layer/layer.min.js"></script>
+    <script type="text/javascript">
+        var a_token = window.sessionStorage.getItem('token') || {};
+        $(function () {
+            getCategory();
+            initTable();
+        });
+        // 窗口改变自适应
+        $(window).resize(function () {
+            $("#exampleTablePagination").bootstrapTable('resetView');
+        });
+        // 页面初始化
+        function initTable() {
+          var that = this;
+            $('#exampleTablePagination').bootstrapTable('destroy');
+            $("#exampleTablePagination").bootstrapTable({
+                height:520,
+                pagination: true,
+                pageNumber: 1,      //初始化加载第一页，默认第一页
+                pageSize: 10,      //每页的记录行数（*）
+                queryParams: function queryParams(params) {
+                    var param = {    
+                      pageNumber: params.pageNumber,    
+                      pageSize: params.pageSize,
+                      searchText:$('#searchText').val(),
+                      category_code: $('#category').val()
+                  };
+                  return param; 
+                },
+                queryParamsType: 'unedfined',
+                sidePagination: "server", 
+                search: false,
+                url: "../api/query_excel_info.php",
+                ajaxOptions: {
+                    headers: {"token" :a_token}
+                },
+                responseHandler: function(data) {
+                    if (data.success == 0) {
+                        layer.alert(data.msg, function (index) {
+                            top.location.href='login.html'
+                        });
+                        return {
+                            "rows":[],
+                            "total":0
+                        }
+                    } else {
+                        return {
+                            "rows": data.rows,
+                            "total": data.total
+                        }
+                    }
+                },
+                columns: [{
+                    field: 'bar_code',
+                    title: '商品条码'
+                }, {
+                    field: 'name',
+                    title: '商品名称'
+                },{
+                    field: 'brand_name',
+                    title: '品牌名称'
+                },{
+                    field: 'category_code',
+                    title: '品类编码'
+                },{
+                    field: 'category_name',
+                    title: '品类名称'
+                },{
+                    field: 'unit',
+                    title: '计量单位'
+                },{
+                    field: 'packing_unit',
+                    title: '包装单位'
+                },{
+                    field: 'packing_specification',
+                    title: '箱规'
+                },{
+                    field: 'valid_period',
+                    title: '保质期'
+                },{
+                    field: 'unit_specification',
+                    title: '规格'
+                },{
+                    field: 'suggested_retail_price',
+                    title: '建议零售价'
+                },{
+                    field: 'portrait',
+                    title: '主图地址'
+                }]
+            });  
+        };
+        // 获取category
+        function getCategory() {
+            $.ajax({
+             type: "GET",
+             url: "../api/query_category_info.php",
+             beforeSend: function(request) {
+                request.setRequestHeader("token", a_token);
+             }
+            }).done(function (res) {
+                var cateData = JSON.parse(res);
+                $.each(cateData, function(i, item){        
+                  $("#category").append($("<option/>").text(item.category_code +'_'+ item.category_name).attr("value",item.category_code).attr('title',item.category_name));  
+                });  
+            }).fail(function () {
+                layer.alert('获取品类失败！') 
+            })
+        }; 
+        // 查询
+        function searchGood() {
+            initTable();
+        };
+        // 导出
+        function excelOut() {
+            var searchText = $("#searchText").val();
+            var category_code = $("#category").val();
+            var iframe = document.createElement('iframe')
+              iframe.style.display = 'none'
+              document.body.appendChild(iframe)
+              iframe.src = "../api/excel_out.php?searchText="+ searchText +"&category_code=" + category_code
+              // 加载文档后删除iframe
+              window.setTimeout(function () {
+                document.body.removeChild(iframe)
+              }, 10000)
+        }
+    </script>
+</body>
+
+</html>

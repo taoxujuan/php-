@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品列表</title>
+    <meta name="keywords" content="商品">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="../favicon.ico"> 
+    <link href="../css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="../css/animate.css" rel="stylesheet">
+    <link href="../css/style.css?v=4.1.0" rel="stylesheet">
+    <style type="text/css">
+        .col-sm-2{
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="modal fade" id="myModal"  tabindex="1000" role='dialog' aria-hidden='true' aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">修改商品</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- 修改商品表单 -->
+                    <form id="updateFrom" class="form-horizontal">
+                        <input type="hidden" name="" id="id" value="">
+                        <div class="form-group">
+                            <label for="bar_code" class="col-sm-2 control-label">商品条码</label>
+                            <div class="col-sm-10">
+                                <p class="form-control-static" id="bar_code"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name" class="col-sm-2 control-label">商品名称</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="name" value="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="brand_name" class="col-sm-2 control-label">品牌名称</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="brand_name" value="">
+                            </div>
+                        </div>
+                        <!-- 品类下拉框 -->
+                        <div class="form-group">
+                            <label for="category" class="col-sm-2 control-label">品类名称</label>
+                            <div class="col-sm-10">
+                                <select id="category" class="form-control" style="padding-top: 3px;">
+                                </select>
+                            </div>
+                        </div>
+                        <!-- end -->
+                        <div class="form-group">
+                            <label for="unit" class="col-sm-2 control-label">计量单位</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="unit" value="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="packing_unit" class="col-sm-2 control-label">包装单位</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="packing_unit" value="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="unit_specification" class="col-sm-2 control-label">规格</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="unit_specification" value="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="valid_period" class="col-sm-2 control-label">保质期</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="valid_period" value="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="portrait" class="col-sm-2 control-label">主图地址</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="portrait" value="">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal" onclick="updataGood()">提交更改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="wrapper wrapper-content animated fadeInRight" style="height:100%;">
+        <div class="ibox float-e-margins style=" style="height:100%;">
+          <div class="example-wrap">
+                <table id="exampleTablePagination">
+                </table>
+          </div>
+        </div>
+    </div> 
+    <!-- 全局js -->
+    <script src="../js/jquery.min.js?v=2.1.4"></script>
+    <script src="../js/bootstrap.min.js?v=3.3.6"></script>
+    <script src="../js/content.js?v=1.0.0"></script>
+    <script src="../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script type="text/javascript" src="../js/plugins/layer/layer.min.js"></script>
+    <script type="text/javascript">
+        var a_token = window.sessionStorage.getItem('token') || {};
+        $(function () {
+            initTable();
+            getCategory();
+        });
+        // 窗口改变自适应
+        $(window).resize(function () {
+            $("#exampleTablePagination").bootstrapTable('resetView');
+        });
+        // enter键关闭最新打开的layer弹框
+        $(document).on('keyup',function(e){
+              if(e.keyCode === 13){
+                  layer.close(layer.index);
+              }
+        });
+        // 页面初始化
+        function initTable() {
+          var that = this;
+            $('#exampleTablePagination').bootstrapTable('destroy');
+            $("#exampleTablePagination").bootstrapTable({
+                height:520,
+                pagination: true,
+                pageNumber: 1,      //初始化加载第一页，默认第一页
+                pageSize: 10,      //每页的记录行数（*）
+                queryParams: function queryParams(params) {
+                    var param = {    
+                      pageNumber: params.pageNumber,    
+                      pageSize: params.pageSize,
+                      searchText:params.searchText 
+                  };    
+                  return param; 
+                },
+                queryParamsType: 'unedfined',
+                sidePagination: "server", 
+                search: true,
+                url: "../api/query_pd_page.php",
+                ajaxOptions: {
+                    headers: {"token" :a_token}
+                },
+                responseHandler: function(data) {
+                    if (data.success == 0) {
+                        layer.alert(data.msg, function (index) {
+                            top.location.href='login.html'
+                        });
+                        return {
+                            "rows":[],
+                            "total":0
+                        }
+                    } else {
+                        return {
+                            "rows": data.rows,
+                            "total": data.total
+                        }
+                    }
+                },
+                columns: [{
+                    field: 'bar_code',
+                    title: '商品条码'
+                }, {
+                    field: 'name',
+                    title: '商品名称'
+                },{
+                    field: 'brand_name',
+                    title: '品牌名称'
+                },{
+                    field: 'category_code',
+                    title: '品类编码'
+                },{
+                    field: 'category_name',
+                    title: '品类名称'
+                },{
+                    field: 'unit',
+                    title: '计量单位'
+                },{
+                    field: 'packing_unit',
+                    title: '包装单位'
+                },{
+                    field: 'packing_specification',
+                    title: '箱规'
+                },{
+                    field: 'valid_period',
+                    title: '保质期'
+                },{
+                    field: 'unit_specification',
+                    title: '规格'
+                },{
+                    field: 'suggested_retail_price',
+                    title: '建议零售价'
+                },{
+                    field: 'portrait',
+                    title: '主图地址'
+                },{
+                    field: 'operation',
+                    title: '操作',
+                    formatter: function (value, row, index) {
+                        var r = '<button class="btn btn-info btn-sl" data-toggle="modal" data-target="#myModal" onclick="getDetail(\''+ index +'\')">修改</button>';
+                        return r;
+                    }
+                }]
+            });  
+        };
+        // 获取当前点击数据
+        function getDetail(index) {
+            var data = $("#exampleTablePagination").bootstrapTable('getData')[index];
+            $('#id').val(data.id);
+            $('#bar_code').html(data.bar_code);
+            $('#name').val(data.name);
+            $('#brand_name').val(data.brand_name);
+            $('#category').children('option:selected').text(data.category_code +'_'+ data.category_name).attr("value",data.category_code).attr('title',data.category_name);
+            $('#category').children('option:selected').css('display', 'none');
+            $('#unit').val(data.unit);
+            $('#packing_unit').val(data.packing_unit);
+            $('#unit_specification').val(data.unit_specification);
+            $('#valid_period').val(data.valid_period);
+            $('#portrait').val(data.portrait);
+        };
+        // 获取category
+        function getCategory() {
+            $.ajax({
+             type: "GET",
+             url: "../api/query_category_info.php",
+             beforeSend: function(request) {
+                request.setRequestHeader("token", a_token);
+             }
+            }).done(function (res) {
+                var cateData = JSON.parse(res);
+                $.each(cateData, function(i, item){        
+                  $("#category").append($("<option/>").text(item.category_code +'_'+ item.category_name).attr("value",item.category_code).attr('title',item.category_name));  
+                });  
+            }).fail(function () {
+                layer.alert('获取品类失败！') 
+            })
+        };
+        // 修改数据
+        function updataGood() {
+            var paramArray = {
+                id: $('#id').val(),
+                name: $('#name').val(),
+                brand_name: $('#brand_name').val(),
+                category_code: $('#category').val(),
+                category_name: $('#category').children('option:selected').attr("title"),
+                unit: $('#unit').val(),
+                packing_unit: $('#packing_unit').val(),
+                unit_specification: $('#unit_specification').val(),
+                valid_period: $('#valid_period').val(),
+                portrait: $('#portrait').val()
+            };
+            $.ajax({
+                type: "GET",
+                url: "../api/updata_pd_info.php",
+                data: paramArray,
+                dataType: "jsonp",
+                jsonp: 'jsonpcallback',
+                beforeSend: function(request) {
+                  request.setRequestHeader("token", a_token);
+                },
+                success: function (data) {
+                    $('#exampleTablePagination').bootstrapTable('refresh');
+                    layer.alert('修改成功！')  
+                },
+                error: function (res) {
+                    var data = JSON.parse(res.responseText);
+                    if (data.success == 0) {
+                        layer.alert(data.msg, function (index) {
+                            top.location.href = "../login.html";
+                        });
+                    };
+                }
+            });
+        };
+    </script>
+</body>
+
+</html>
